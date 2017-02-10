@@ -1,0 +1,16 @@
+name = DLS REST Routes
+description = A module to help manage REST Routes
+core = 7.x
+package = "DLS"
+version = 0.0.1
+; Required by simpletest
+testing_api = 2.x
+
+configure = admin/config/dls/rest_routes
+
+; Files
+files[] = dls_rest_routes.module
+files[] = dls_rest_routes.test
+
+; Dependencies (uncomment the following line to enable)
+; dependencies[] = dls

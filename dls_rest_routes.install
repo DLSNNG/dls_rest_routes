@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * Implements hook_install()
+ */
+ 
+function dls_rest_routes_install() {
+  variable_set('dls_rest_routes', array());
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function dls_rest_routes_uninstall() {
+
+  // remove variables
+  $vars = array(
+      'dls_rest_routes'
+  );
+  if (!empty($vars)) {
+    foreach ($vars as $var):
+      variable_del($var);
+    endforeach;
+  }
+}

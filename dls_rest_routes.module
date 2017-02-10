@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file DLS REST Routes module.
+ */
+ 
+ define('DLS_REST_ROUTES_ADMIN_PATH', 'admin/config/dls/restroutes');
+ define('DLS_REST_CREDENTIALS_ADMIN_PATH', 'admin/config/dls/restcredentials');
+
+//---------------------------------------------------------------------------------------------------------------------------
+// Hooks and preprocess functions
+//---------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Implementation of hook_permission().
+ * Set permissions for module
+ */
+function dls_rest_routes_permission() {
+  return array(
+      'view rest routes' => array(
+          'title' => 'View Rest Routes',
+          'description' => t('Allow user to view rest routes configuration page.')
+      ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ *
+ * @return array
+ */
+function dls_rest_routes_menu() {
+  $items = array();
+  $path = drupal_get_path('module', 'dls_rest_routes') . '/includes';
+
+  $items[DLS_REST_ROUTES_ADMIN_PATH] = array(
+      'title' => 'DLS REST Routes Configuration',
+      'description' => 'Set REST URL for Various Routes.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('dls_rest_routes_configuration_form'),
+      'access arguments' => array('administer site configuration'),
+      'file path' => $path,
+      'file' => 'dls_rest_routes.routes_admin.inc',
+  );
+  
+  $items[DLS_REST_CREDENTIALS_ADMIN_PATH] = array(
+      'title' => 'DLS REST Credentials Configuration',
+      'description' => 'Set REST Credentials for Various Routes.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('dls_rest_credentials_configuration_form'),
+      'access arguments' => array('administer site configuration'),
+      'file path' => $path,
+      'file' => 'dls_rest_routes.credentials_admin.inc',
+  );
+  
+  return $items;
+}

@@ -1,0 +1,116 @@
+<?php
+
+  class RestRoutesTestCase extends DrupalUnitTestCase {
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getInfo() {
+      return array(
+        'name' => 'Rest Routes Test Case',
+        'description' => 'Test various methods of the RestRoutes Object.',
+        'group' => 'RestRoutes',
+      );
+    }
+
+    public function setUp() {
+      module_load_include('inc', 'dls_rest_routes', 'includes/models/dls_rest_routes.rest_routes');
+      module_load_include('inc', 'dls_rest_routes', 'includes/models/dls_rest_routes.rest_credentials');
+      parent::setUp();
+    }
+
+    public function testRestRoutesConstructor() {
+      $message = 'It should set its groups property to the variable stored in dls_rest_routes 
+                  on construction.';
+      $restRoutes = RestRoutes::get();
+      $groups = variable_get('dls_rest_routes', array());
+      $this->assertEqual($restRoutes->groups, $groups, $message, 'contstructor()');
+    }
+    
+    public function testRestRoutesMethods() {
+      $message = 'It should be able to set the group assigned in setRoute()';
+      $restRoutes = RestRoutes::get();
+      $restRoutes->setRoute('test group', 'testing', 'test path');
+      $groups = $restRoutes->groups;
+      $this->assertTrue(isset($groups['test group']), $message, 'setRoute()');
+      
+      $message = 'It should store the name assigned in setRoute()';
+      $this->assertTrue(isset($groups['test group']['testing']), $message, 'setRoute()');
+      
+      $message = 'It should store the path assigned in setRoute()';
+      $this->assertEqual($groups['test group']['testing'], 'test path', $message, 'setRoute()');
+      
+      $message = 'It should be able to retrieve routes for a given group';
+      $retrievedRoutes = $restRoutes->getRoutesForGroup('test group');
+      $expectedRoutes = array(
+        'testing' => 'test path',
+      );
+      $this->assertEqual($retrievedRoutes, $expectedRoutes, $message, 'getRoutes()');
+      
+      $message = 'It should be able to retrieve the path for a given route name';
+      $path = $restRoutes->getPathFor('test group', 'testing');
+      $this->assertEqual($path, 'test path', $message, 'getPathFor()');
+      
+      $message = 'It should be able to remove a route';
+      $restRoutes->removeRoute('test group', 'testing');
+      $groups = $restRoutes->groups;
+      $this->assertFalse(isset($groups['testing']), $message, 'removeRoute()');
+      
+    }
+    
+    public function testRestCredentialsConstructor() {
+      $message = 'It should set its groups property to the variable stored in dls_rest_credentials 
+                  on construction.';
+      $restCredentials = RestCredentials::get();
+      $groups = variable_get('dls_rest_credentials', array());
+      $this->assertEqual($restCredentials->groups, $groups, $message, 'contstructor()');
+    }
+    
+    public function testRestCredentialsCoreMethods() {
+      $message = 'It should be able to set the group assigned in setCredentials()';
+      $restCredentials = RestCredentials::get();
+      $restCredentials->setCredentials('test group', 'tester', 'testing1234');
+      $groups = $restCredentials->groups;
+      $this->assertTrue(isset($groups['test group']), $message, 'setCredentials()');
+      
+      $message = 'It should store the username assigned in setCredentials()';
+      $username = $groups['test group']['username'];
+      $this->assertEqual($username, 'tester', $message, 'setCredentials()');
+      
+      //TODO: change this to encrypt password
+      $message = 'It should store the password assigned in setCredentials()';
+      $password = $groups['test group']['password'];
+      $this->assertEqual($password, 'testing1234', $message, 'setCredentials()');
+      
+      $message = 'It should be able to retrieve the username for a given group';
+      $credentialsRetreived = $restCredentials->getCredentialsFor('test group');
+      $username = $credentialsRetreived['username'];
+      $this->assertEqual($username, 'tester', $message, 'getCredentialsFor()');
+      
+      $message = 'It should be able to retrieve the password for a given group';
+      $password = $credentialsRetreived['password'];
+      $this->assertEqual($password, 'testing1234', $message, 'getCredentialsFor()');
+      
+      $message = 'It should be able to remove a groups credentials';
+      $restCredentials->removeCredentials('test group');
+      $this->assertFalse(isset($restCredentials->groups['test group']), $message, 'removeCredentials()');
+    }
+    
+    function testRestRoutesGetPathWithCredentialsFor() {
+      $restRoutes = RestRoutes::get();
+      $restRoutes->setRoute('testing', 'test route', 'http://testing.test');
+      $restCredentials = RestCredentials::get();
+      $restCredentials->setCredentials('testing', 'testuser', 'testpassword');
+      $newPath = $restCredentials->appendCredentialsToPath('http://testing.test', 'testing');
+      $pathWithCredentials = $restRoutes->getPathWithCredentialsFor('testing', 'test route');
+      
+      $message = 'It should be able to add rest credentials to a path';
+      $this->assertEqual($newPath, 'http://testuser:testpassword@testing.test', 
+                         $message, 'appendCredentialsToPath()');
+                         
+      $message = 'It should be able to add rest credentials to Rest Routes Path';
+      $this->assertEqual($pathWithCredentials, 'http://testuser:testpassword@testing.test', 
+                         $message, 'getPathWithCredentialsFor()');
+    }
+    
+  }
